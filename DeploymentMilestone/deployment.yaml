@@ -1,0 +1,160 @@
+---
+- name: Creating or checking AWS EC2 Instance
+  hosts: localhost
+  gather_facts: False
+
+  vars:
+    instance_type: t2.micro
+    image: ami-cd0f5cb6
+    region: us-east-1
+    security_group: launch-wizard-1
+    aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY') }}"
+    aws_secret_key: "{{ lookup('env','AWS_SECRET_KEY') }}"
+    instance_name: BotInstance
+    key_pair: "{{ lookup('env', 'AWS_KEY_NAME') }}"
+
+  tasks:
+
+    - name: Disabling Ansible Host Key Checking
+      shell: export ANSIBLE_HOST_KEY_CHECKING=False
+
+    - name: Checking already created instance name
+      ec2_remote_facts:
+        aws_access_key: "{{aws_access_key}}"
+        aws_secret_key: "{{aws_secret_key}}"
+        region: "{{region}}"
+        filters:
+          "tag:Name": "{{instance_name}}"
+          "instance-state-code": "16"
+      register: ec2
+
+    - name: Launching new instance
+      ec2:
+         key_name: "{{ key_pair }}"
+         group: "{{ security_group }}"
+         aws_access_key: "{{aws_access_key}}"
+         aws_secret_key: "{{aws_secret_key}}"
+         instance_type: "{{ instance_type }}"
+         image: "{{ image }}"
+         wait: true
+         region: "{{ region }}"
+         instance_tags:
+            Name: "{{instance_name}}"
+      register: new_instance
+      when: ec2.instances|length==0
+
+    - name: Fetching Public IP For existing Instance.
+      set_fact: public_ip="{{ec2.instances[0].public_ip_address}}"
+      when: ec2.instances|length>0
+
+    - name: Fetching Public Ip for newly created Instance.
+      set_fact: public_ip={{new_instance.instances[0].public_ip}}
+      when: ec2.instances|length==0
+
+    - name: Printing Public Ip
+      debug:
+        msg: "{{public_ip}}"
+
+    - name: Add new instance to host group
+      add_host:
+        hostname: "{{ public_ip }}"
+        groupname: launched
+
+    - name: Wait for SSH to come up
+      wait_for:
+        host: "{{ public_ip }}"
+        port: 22
+        delay: 60
+        timeout: 320
+        state: started
+      when: ec2.instances|length==0
+
+- name: Configuring Instances
+  hosts: launched
+  remote_user: ubuntu
+  become: True
+  gather_facts: False
+
+  vars:
+    ansible_ssh_private_key_file: "{{ lookup('env','AWS_KEY_PATH') }}"
+    bot_code_path: "{{ lookup('env', 'BOT_CODE_PATH') }}"
+    ubuntu_home: /home/ubuntu
+    host_key_checking: False
+
+  tasks:
+
+    - name: Key path debug
+      debug:
+        msg: "{{ansible_ssh_private_key_file}}"
+
+    - name: Checking Pyhton on AWS
+      raw: test -e /usr/bin/python || (sudo apt -y update && sudo apt install -y python-minimal)
+
+    - name: Gathering facts
+      setup:
+
+    - name: Installing Dependencies
+      apt:
+        name: "{{item}}"
+        state: present
+        update_cache: yes
+      with_items:
+        - build-essential
+        - nodejs-legacy
+        - npm
+        - curl
+        - libcurl3
+      become: yes
+
+    - name: Installing forever
+      npm:
+        name: forever
+        global: yes
+        state: present
+      become: yes
+
+    - name: Installing git
+      apt:
+        name: git
+        state: present
+      become: yes
+
+    - name: Adding apt-get key for docker
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Adding docker repo
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable
+        state: present
+
+    - name: Installing Docker
+      apt:
+        name: docker-ce
+        update_cache: yes
+        state: present
+      become: yes
+
+    - name: Copying Bot Code from Local to Remote
+      synchronize:
+        src: /Users/karanchaudhry/Documents/NCSU/HomeWorks/Fall2017/CSC510_SE/CSC-510-Project/DeploymentMilestone/BotCode
+        dest: "{{ubuntu_home}}"
+        owner: no
+        group: no
+      become: yes
+
+
+    - name: Installing npm packages
+      npm:
+        path: "{{ubuntu_home}}/BotCode"
+      become: yes
+
+    - name: Checking list of Nodejs running using forever
+      command: forever list
+      register: forever_list
+      changed_when: false
+
+    - name: Starting nodejs app using forever
+      command: forever start "{{ ubuntu_home }}/BotCode/slack/slackbot.js"
+      when: "forever_list.stdout.find('slackbot.js') == -1"

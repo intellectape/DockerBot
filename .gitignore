@@ -1,0 +1,8 @@
+BotMilestone/.idea
+.idea
+*.iml
+node_modules
+*/node_modules
+BotMilestone/node_modules
+BotMilestone/configuration/config.json
+*.retry

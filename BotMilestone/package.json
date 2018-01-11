@@ -1,0 +1,28 @@
+{
+    "name": "botmilestone2",
+    "version": "0.0.0",
+    "private": true,
+    "scripts": {
+        "start": "node ./bin/www"
+    },
+    "dependencies": {
+        "aws-sdk": "^2.133.0",
+        "body-parser": "~1.17.1",
+        "botkit": "^0.6.4",
+        "cookie-parser": "~1.4.3",
+        "debug": "~2.6.3",
+        "dockerode": "2.5.2",
+        "express": "~4.15.2",
+        "is-git-url": "^1.0.0",
+        "jade": "~1.11.0",
+        "mock-aws": "^1.2.3",
+        "mock-fs": "^4.4.2",
+        "morgan": "~1.8.1",
+        "nock": "^9.0.24",
+        "serve-favicon": "~2.4.2"
+    },
+    "devDependencies": {
+        "aws-sdk-mock": "^1.7.0",
+        "mock-git": "^2.0.0"
+    }
+}

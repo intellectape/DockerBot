@@ -1,0 +1,87 @@
+{
+    "containerInstanceList": [{
+            "containerInstanceArns": ["Container1", "Container2", "Container3"],
+            "nextToken": "TrialInstance"
+
+        }
+
+    ],
+
+    "clusterInstanceList": [{
+        "clusterArns": ["Cluster1", "Cluster2"],
+        "nextToken": "NULL"
+    }],
+
+    "taskDefinitionList": [
+
+        {
+            "taskDefinitionArn": "arn:aws:ecs:us-east-1:820211611863:task-definition/first:2",
+            "containerDefinitions": [],
+            "family": "first",
+            "revision": 2,
+            "volumes": [],
+            "status": "ACTIVE",
+            "requiresAttributes": [],
+            "placementConstraints": []
+
+        }
+
+    ],
+    "repositories": [{
+            "registryId": "012345678910",
+            "repositoryArn": "arn:aws:ecr:us-east-1:012345678910:repository/ubuntu",
+            "repositoryName": "ubuntu"
+        },
+        {
+            "registryId": "012345678910",
+            "repositoryArn": "arn:aws:ecr:us-east-1:012345678910:repository/test",
+            "repositoryName": "test"
+        }
+    ],
+    "repository": {
+        "registryId": "012345678901",
+        "repositoryArn": "arn:aws:ecr:us-east-1:012345678901:repository/myrepo",
+        "repositoryName": "myrepo",
+        "repositoryUri": "012345678901.dkr.ecr.us-east-1.amazonaws.com/myrepo"
+    },
+    "taskDefinition": {
+        "containerDefinitions": [{
+            "name": "hello-world",
+            "command": [
+                "sleep",
+                "360"
+            ],
+            "cpu": 10,
+            "environment": [],
+            "essential": true,
+            "image": "busybox",
+            "memory": 10,
+            "mountPoints": [],
+            "portMappings": [],
+            "volumesFrom": []
+        }],
+        "family": "sleep360",
+        "revision": 1,
+        "taskDefinitionArn": "arn:aws:ecs:us-east-1:<aws_account_id>:task-definition/sleep360:19",
+        "volumes": []
+    },
+    "tasks": [{
+        "containerInstanceArn": "arn:aws:ecs:us-east-1:<aws_account_id>:container-instance/ffe3d344-77e2-476c-a4d0-bf560ad50acb",
+        "containers": [{
+            "name": "hello-world",
+            "containerArn": "arn:aws:ecs:us-east-1:<aws_account_id>:container/58591c8e-be29-4ddf-95aa-ee459d4c59fd",
+            "lastStatus": "PENDING",
+            "taskArn": "arn:aws:ecs:us-east-1:<aws_account_id>:task/a9f21ea7-c9f5-44b1-b8e6-b31f50ed33c0"
+        }],
+        "desiredStatus": "RUNNING",
+        "lastStatus": "PENDING",
+        "overrides": {
+            "containerOverrides": [{
+                "name": "hello-world"
+            }]
+        },
+        "taskArn": "arn:aws:ecs:us-east-1:<aws_account_id>:task/a9f21ea7-c9f5-44b1-b8e6-b31f50ed33c0",
+        "taskDefinitionArn": "arn:aws:ecs:us-east-1:<aws_account_id>:task-definition/sleep360:1"
+    }]
+
+}
