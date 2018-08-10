@@ -5,4 +5,17 @@ node_modules
 */node_modules
 BotMilestone/node_modules
 BotMilestone/configuration/config.json
+BotMilestone/package-lock.json
+
+DeploymentMilestone/package-lock.json
+DeploymentMilestone/node_modules
+DeploymentMilestone/configuration/config.json
+
+DesignMilestone/package-lock.json
+DesignMilestone/node_modules
+DesignMilestone/configuration/config.json
+
+ServiceMilestone/package-lock.json
+ServiceMilestone/node_modules
+ServiceMilestone/configuration/config.json
 *.retry
